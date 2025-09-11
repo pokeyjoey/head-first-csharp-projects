@@ -1,4 +1,6 @@
-﻿namespace AnimalMatchingGameCommandLine;
+﻿using Windows.Media.Transcoding;
+
+namespace AnimalMatchingGameCommandLine;
 
 public partial class MainPage : ContentPage
 {
@@ -32,11 +34,63 @@ public partial class MainPage : ContentPage
 			button.Text = nextEmoji;
 			animalEmoji.RemoveAt(index);
 		}
+
+		Dispatcher.StartTimer(TimeSpan.FromSeconds(.1), TimerTick);
+
     }
 
-    private void Button_Clicked(object sender, EventArgs e)
-    {
-    }
+	int tentsOfSedoncElapsed = 0;
+	private bool TimerTick()
+	{
+		if (!this.IsLoaded) return false;
+
+		tentsOfSedoncElapsed++;
+
+		TimeElapsed.Text = "Time elapsed" + (tentsOfSedoncElapsed / 10F).ToString("0.0s");
+
+		if (PlayAgainButton.IsVisible)
+		{
+			tentsOfSedoncElapsed = 0;
+			return false;
+		}
+
+		return true;
+	}
+
+	Button lastClicked;
+	bool findingMatch = false;
+	int matchesFound;
+
+	private void Button_Clicked(object sender, EventArgs e)
+	{
+		if (sender is Button buttonClicked)
+		{
+			if (!string.IsNullOrWhiteSpace(buttonClicked.Text) && (findingMatch == false))
+			{
+				buttonClicked.BackgroundColor = Colors.Red;
+				lastClicked = buttonClicked;
+				findingMatch = true;
+			}
+			else
+			{
+				if ((buttonClicked != lastClicked) && (buttonClicked.Text == lastClicked.Text) && (!String.IsNullOrWhiteSpace(buttonClicked.Text))) 
+				{
+					matchesFound++;
+					lastClicked.Text = " ";
+					buttonClicked.Text = " ";
+				}
+				lastClicked.BackgroundColor = Colors.LightBlue;
+				buttonClicked.BackgroundColor = Colors.LightBlue;
+				findingMatch = false;
+			}
+		}
+
+		if (matchesFound == 8) {
+			matchesFound = 0;
+			AnimalButtons.IsVisible = false;
+			PlayAgainButton.IsVisible = true;
+		}
+	}
 
 
 }
